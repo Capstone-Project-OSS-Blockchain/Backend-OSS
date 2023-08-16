@@ -35,7 +35,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 			defer file.Close()
 
 			// Upload the file to MinIO
-			bucketName := "download"
+			bucketName := "dzaky-upload"
 			//bucket name diubah menggunakan bucket local, tapi tetap masih fail
 			objectName := fileHeader.Filename
 

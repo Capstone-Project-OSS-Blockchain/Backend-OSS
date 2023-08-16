@@ -22,7 +22,7 @@ func DownloadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	
 
-	object, err := minioClient.GetObject(context.Background(), "download", fileName, minio.GetObjectOptions{})
+	object, err := minioClient.GetObject(context.Background(), "dzaky-upload", fileName, minio.GetObjectOptions{})
 																	//bucket name diubah menggunakan bucket local, tapi tetap masih fail
 	if err != nil {
 		http.Error(w, "Failed to retrieve file from MinIO", http.StatusInternalServerError)
