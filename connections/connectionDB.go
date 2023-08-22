@@ -20,9 +20,10 @@ func Connect() {
 	db := os.Getenv("DB_DATABASE")
 	username := os.Getenv("DB_USERNAME")
 	pass := os.Getenv("DB_PASSWORD")
+	host := os.Getenv("DB_HOST")
 
 	var err error
-	DB, err = gorm.Open(conn, username+":"+pass+"@tcp(localhost:"+port+")/"+db+"?parseTime=True")
+	DB, err = gorm.Open(conn, username+":"+pass+"@tcp("+host+":"+port+")/"+db+"?parseTime=True")
 	if err != nil {
 		panic("Failed to connect to MySQL database")
 	}
