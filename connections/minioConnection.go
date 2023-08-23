@@ -1,14 +1,16 @@
 package connections
 
 import (
+	"os"
+
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
 
 func InitMinIOClient() (*minio.Client, error) {
-	endpoint := "play.min.io"
-	accessKey := "Q3AM3UQ867SPQQA43P2F"
-	secretKey := "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
+	endpoint := os.Getenv("MINIO_ENDPOINT") 
+	accessKey := os.Getenv("MINIO_ACCESSKEY")
+	secretKey := os.Getenv("MINIO_SECRETKEY")
 	useSSL := true
 
 	// Initialize MinIO client
