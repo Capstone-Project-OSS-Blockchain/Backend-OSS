@@ -29,11 +29,11 @@ func main() {
 	auth.InitDB(connections.DB)
 	r.HandleFunc("/register", auth.RegisterUser).Methods("POST")
 	r.HandleFunc("/login", auth.Login).Methods("POST")
-	//r.HandleFunc("/upload", upload.UploadHandler).Methods("POST")
+	r.HandleFunc("/upload", upload.UploadHandler).Methods("POST")
 	//r.HandleFunc("/download/{filename}", download.DownloadHandler).Methods("GET")
 	//r.HandleFunc("/protected", auth.ProtectedRoute).Methods("GET").Handler(auth.AuthMiddleware(http.HandlerFunc(auth.ProtectedRoute)))
 
-	r.HandleFunc("/upload", upload.UploadHandler).Methods("POST").Handler(auth.AuthMiddleware(http.HandlerFunc(upload.UploadHandler)))
+	// r.HandleFunc("/upload", upload.UploadHandler).Methods("POST").Handler(auth.AuthMiddleware(http.HandlerFunc(upload.UploadHandler)))
 	r.HandleFunc("/download/{filename}", download.DownloadHandler).Methods("GET").Handler(auth.AuthMiddleware(http.HandlerFunc(download.DownloadHandler)))
 
 	http.Handle("/", r)

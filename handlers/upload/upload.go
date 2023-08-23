@@ -31,7 +31,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
     pdfBuffer.WriteString("This is a generated PDF content.")
 
     // Upload the generated PDF buffer to MinIO
-    bucketName := "wasabi-bucket"
+    bucketName := "services-bucket"
     objectName := filename
 
     _, err = minioClient.PutObject(r.Context(), bucketName, objectName, pdfBuffer, int64(pdfBuffer.Len()), minio.PutObjectOptions{
@@ -47,3 +47,4 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
     // Close the buffer
     defer pdfBuffer.Reset()
 }
+

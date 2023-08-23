@@ -15,6 +15,7 @@ func Connect() {
 	if cek != nil {
 		log.Fatal("Error loading .env file")
 	}
+	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
 	conn := os.Getenv("DB_CONNECTION")
 	db := os.Getenv("DB_DATABASE")
@@ -22,7 +23,7 @@ func Connect() {
 	pass := os.Getenv("DB_PASSWORD")
 
 	var err error
-	DB, err = gorm.Open(conn, username+":"+pass+"@tcp(localhost:"+port+")/"+db+"?parseTime=True")
+	DB, err = gorm.Open(conn, username+":"+pass+"@tcp("+host+":"+port+")/"+db+"?parseTime=True")
 	if err != nil {
 		panic("Failed to connect to MySQL database")
 	}
