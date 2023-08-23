@@ -15,7 +15,6 @@ func Connect() {
 	if cek != nil {
 		log.Fatal("Error loading .env file")
 	}
-	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
 	conn := os.Getenv("DB_CONNECTION")
 	db := os.Getenv("DB_DATABASE")
