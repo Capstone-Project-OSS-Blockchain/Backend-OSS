@@ -27,7 +27,7 @@ func main() {
 
 
 	r := mux.NewRouter()
-
+//ini bini
 	corsHandler := cors.New(cors.Options{
 		AllowedHeaders: []string{"*"},
 		AllowedOrigins: []string{"*"},           // You can specify specific origins here or use "*" for all origins
