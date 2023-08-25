@@ -28,13 +28,13 @@ func main() {
 
 	r := mux.NewRouter()
 
-	c := cors.New(cors.Options{
-        AllowedOrigins: []string{""}, // Allow requests from any origin
-        AllowedMethods: []string{""}, // Allow all HTTP methods
-        AllowedHeaders: []string{"*"}, // Allow all headers
-    })
+	corsHandler := cors.New(cors.Options{
+		AllowedHeaders: []string{"*"},
+		AllowedOrigins: []string{"*"},           // You can specify specific origins here or use "*" for all origins
+		AllowedMethods: []string{"GET", "POST","PUT", "PATCH", "DELETE"}, // Allowed HTTP methods
+	})
 
-	
+	r.Use(corsHandler.Handler)
 
 	auth.InitDB(connections.DB)
 	r.HandleFunc("/register", auth.RegisterUser).Methods("POST")
@@ -47,7 +47,7 @@ func main() {
 	r.HandleFunc("/download/{filename}", download.DownloadHandler).Methods("GET").Handler(auth.AuthMiddleware(http.HandlerFunc(download.DownloadHandler)))
 
 	// http.Handle("/", r)
-	http.Handle("/", c.Handler(r))
+	http.Handle("/", corsHandler.Handler(r))
 
 	log.Printf("Server is running on port %s", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
