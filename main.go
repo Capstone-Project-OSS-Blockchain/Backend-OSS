@@ -12,6 +12,7 @@ import (
 	"github.com/gorilla/mux"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 )
 
 func main() {
@@ -24,7 +25,16 @@ func main() {
 	port := os.Getenv("PORT")
 	connections.Connect()
 
+
 	r := mux.NewRouter()
+
+	c := cors.New(cors.Options{
+        AllowedOrigins: []string{""}, // Allow requests from any origin
+        AllowedMethods: []string{""}, // Allow all HTTP methods
+        AllowedHeaders: []string{"*"}, // Allow all headers
+    })
+
+	
 
 	auth.InitDB(connections.DB)
 	r.HandleFunc("/register", auth.RegisterUser).Methods("POST")
@@ -36,7 +46,8 @@ func main() {
 	r.HandleFunc("/upload", upload.UploadHandler).Methods("POST").Handler(auth.AuthMiddleware(http.HandlerFunc(upload.UploadHandler)))
 	r.HandleFunc("/download/{filename}", download.DownloadHandler).Methods("GET").Handler(auth.AuthMiddleware(http.HandlerFunc(download.DownloadHandler)))
 
-	http.Handle("/", r)
+	// http.Handle("/", r)
+	http.Handle("/", c.Handler(r))
 
 	log.Printf("Server is running on port %s", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))

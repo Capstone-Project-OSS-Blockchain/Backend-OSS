@@ -22,7 +22,7 @@ func DownloadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	//nama bucket untuk minio
-	bucket := "wasabi-bucket"
+	bucket := "services-bucket"
 
 	object, err := minioClient.GetObject(context.Background(), bucket, fileName, minio.GetObjectOptions{})
 																	//bucket name diubah menggunakan bucket local, tapi tetap masih fail
@@ -41,6 +41,9 @@ func DownloadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", info.ContentType)
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Starting download...\n"))
 
 	// Copy the MinIO object's content to the response writer
 	_, err = io.Copy(w, object)
