@@ -2,14 +2,19 @@ package upload
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"math/rand"
 	"net/http"
+	"os"
 	_ "os"
 	"strconv"
-    "encoding/json"
+	"strings"
+	"time"
 
+	"github.com/dgrijalva/jwt-go"
+	"github.com/jinzhu/gorm"
 	"github.com/jung-kurt/gofpdf"
 
 	"github.com/google/uuid"
@@ -17,7 +22,17 @@ import (
 	_ "github.com/minio/minio-go/v7/pkg/credentials"
 
 	minioconnections "github.com/Capstone-Project-OSS-Blockchain/Backend-OSS/connections"
+	"github.com/Capstone-Project-OSS-Blockchain/Backend-OSS/models"
 )
+
+var (
+	mysqlDB   *gorm.DB
+	secretKey = os.Getenv("SECRET_KEY")
+)
+
+func InitDB(db *gorm.DB) {
+	mysqlDB = db
+}
 
 func generateNIB() string {
 	// Generate a random NIB number with a length of 7
@@ -30,7 +45,7 @@ func generateNIB() string {
 
 func generatePDF() (*bytes.Buffer, string, error) {
 
-    // Generate a UUID for the filename
+	// Generate a UUID for the filename
 	filename := uuid.New().String() + ".pdf"
 
 	// Create a buffer to store PDF content
@@ -72,7 +87,7 @@ func generatePDF() (*bytes.Buffer, string, error) {
 
 	pdf.Output(pdfBuffer)
 
-    return pdfBuffer, filename, nil
+	return pdfBuffer, filename, nil
 }
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
@@ -82,13 +97,12 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-    pdfBuffer, filename, err := generatePDF()
-    if err != nil {
+	pdfBuffer, filename, err := generatePDF()
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Upload the generated PDF buffer to MinIO
 	bucketName := "services-bucket"
 	objectName := filename
 
@@ -102,10 +116,51 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	// fmt.Fprintln(w, filename+" PDF file generated and uploaded successfully!")
 
-    w.Header().Set("Content-Type", "application/json")
+	authHeader := r.Header.Get("Authorization")
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secretKey), nil
+	})
+	if err != nil {
+		http.Error(w, "Failed to parse token", http.StatusBadRequest)
+		return
+	}
+
+	if !token.Valid {
+		http.Error(w, "Invalid token", http.StatusUnauthorized)
+		return
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		http.Error(w, "Failed to extract claims from token", http.StatusBadRequest)
+		return
+	}
+
+	userID, ok := claims["iss"].(string)
+	if !ok {
+		http.Error(w, "Invalid user_id claim", http.StatusBadRequest)
+		return
+	}
+
+	currentTime := time.Now()
+	date := currentTime.Format("15:04:05 02-01-2006")
+	newOwnership := models.Ownership{
+		UserId:    userID,
+		Filename:  filename,
+		Timestamp: date,
+	}
+
+	if err := mysqlDB.Table("owners").Create(&newOwnership).Error; err != nil {
+		fmt.Println("Error creating ownership record:", err)
+		http.Error(w, "Failed to create ownership record", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"FileName":   filename,
-		"message": "The PDF File is generated and Uploaded Successfully!",
+		"FileName": filename,
+		"message":  "The PDF File is generated and Uploaded Successfully!",
 	})
 
 	// Close the buffer

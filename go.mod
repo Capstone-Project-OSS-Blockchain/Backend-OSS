@@ -14,6 +14,8 @@ require (
 	golang.org/x/crypto v0.12.0
 )
 
+require github.com/jinzhu/now v1.1.5 // indirect
+
 require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
@@ -36,4 +38,5 @@ require (
 	golang.org/x/sys v0.11.0 // indirect
 	golang.org/x/text v0.12.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
+	gorm.io/gorm v1.25.4
 )
