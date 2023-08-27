@@ -143,7 +143,6 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid user_id claim", http.StatusBadRequest)
 		return
 	}
-
 	currentTime := time.Now()
 	date := currentTime.Format("15:04:05 02-01-2006")
 	newOwnership := models.Ownership{

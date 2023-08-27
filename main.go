@@ -8,7 +8,6 @@ import (
 	"github.com/Capstone-Project-OSS-Blockchain/Backend-OSS/connections"
 	"github.com/Capstone-Project-OSS-Blockchain/Backend-OSS/handlers/auth"
 	"github.com/Capstone-Project-OSS-Blockchain/Backend-OSS/handlers/download"
-	"github.com/Capstone-Project-OSS-Blockchain/Backend-OSS/handlers/ownership"
 	"github.com/Capstone-Project-OSS-Blockchain/Backend-OSS/handlers/upload"
 	"github.com/gorilla/mux"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -27,16 +26,16 @@ func main() {
 	connections.Connect()
 
 	r := mux.NewRouter()
-
-	c := cors.New(cors.Options{
-		AllowedOrigins: []string{""},  // Allow requests from any origin
-		AllowedMethods: []string{""},  // Allow all HTTP methods
-		AllowedHeaders: []string{"*"}, // Allow all headers
+	//ini bini
+	corsHandler := cors.New(cors.Options{
+		AllowedHeaders: []string{"*"},
+		AllowedOrigins: []string{"*"},                                     // You can specify specific origins here or use "*" for all origins
+		AllowedMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE"}, // Allowed HTTP methods
 	})
 
+	r.Use(corsHandler.Handler)
+
 	auth.InitDB(connections.DB)
-	upload.InitDB(connections.DB)
-	ownership.InitDB(connections.DB)
 	r.HandleFunc("/register", auth.RegisterUser).Methods("POST")
 	r.HandleFunc("/login", auth.Login).Methods("POST")
 	// r.HandleFunc("/upload", upload.UploadHandler).Methods("POST")
@@ -46,10 +45,8 @@ func main() {
 	r.HandleFunc("/upload", upload.UploadHandler).Methods("POST").Handler(auth.AuthMiddleware(http.HandlerFunc(upload.UploadHandler)))
 	r.HandleFunc("/download/{filename}", download.DownloadHandler).Methods("GET").Handler(auth.AuthMiddleware(http.HandlerFunc(download.DownloadHandler)))
 
-	r.HandleFunc("/getFiles", ownership.GetOwnershipByUserID).Methods("GET").Handler(auth.AuthMiddleware(http.HandlerFunc(ownership.GetOwnershipByUserID)))
-
 	// http.Handle("/", r)
-	http.Handle("/", c.Handler(r))
+	http.Handle("/", corsHandler.Handler(r))
 
 	log.Printf("Server is running on port %s", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
